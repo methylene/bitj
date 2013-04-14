@@ -6,7 +6,7 @@ import ooq.asdf.tools.ParameterizedRunnable;
 import ooq.asdf.view.PrivateToPublicPopup;
 
 public enum Action {
-	CONVERT(PrivateToPublicPopup.SHOW_GUI);
+	CONVERT(PrivateToPublicPopup.createRunnable());
 	
 	private static final ParameterizedRunnable DEFAULT_ACTION = new ParameterizedRunnable() {
 		@Override public void run() {

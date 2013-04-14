@@ -5,7 +5,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -13,6 +12,7 @@ import javax.swing.JTextField;
 
 import ooq.asdf.tools.Base58Tools;
 import ooq.asdf.tools.ParameterizedRunnable;
+import ooq.asdf.tools.ParameterizedRunnableFactory;
 
 public class PrivateToPublicPopup extends JPanel implements ActionListener {
 
@@ -20,28 +20,13 @@ public class PrivateToPublicPopup extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
-	protected JTextField textField;
-	protected JTextArea textArea;
+	protected final JTextField textField;
+	protected final JTextArea textArea;
 	private final static String newline = "\n";
-
-	public static final ParameterizedRunnable SHOW_GUI = new ParameterizedRunnable() {
-		@Override public void run() {
-			javax.swing.SwingUtilities.invokeLater(new Runnable() {
-				@Override public void run() {
-					//Create and set up the window.
-					final JFrame frame = new JFrame("Enter private key in base58 format ...");
-					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-					//Add contents to the window.
-					frame.add(new PrivateToPublicPopup());
-
-					//Display the window.
-					frame.pack();
-					frame.setVisible(true);
-				}
-			});
-		}
-	};
+	
+	public static final ParameterizedRunnable createRunnable() {
+		return ParameterizedRunnableFactory.runnableJPanel(new PrivateToPublicPopup(), "Enter private key in base58 format ...");
+	}
 
 	public PrivateToPublicPopup() {
 		super(new GridBagLayout());
