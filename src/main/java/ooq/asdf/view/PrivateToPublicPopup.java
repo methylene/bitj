@@ -1,32 +1,46 @@
 package ooq.asdf.view;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.awt.GridBagConstraints;
+
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import ooq.asdf.tools.Base58Tools;
-import ooq.asdf.tools.ParameterizedRunnable;
-import ooq.asdf.tools.ParameterizedRunnableFactory;
+import org.slf4j.Logger;
 
-public class PrivateToPublicPopup extends JPanel implements ActionListener {
+import ooq.asdf.tools.Base58Tools;
+import ooq.asdf.tools.JPanelTools;
+import ooq.asdf.tools.RunnableFactory;
+
+public final class PrivateToPublicPopup extends JPanel implements ActionListener {
 
 	private static final int COLUMNS = 40;
 
 	private static final long serialVersionUID = 1L;
 
-	protected final JTextField textField;
-	protected final JTextArea textArea;
-	private final static String newline = "\n";
+	private final static String LF = "\n";
 	
-	public static final ParameterizedRunnable createRunnable() {
-		return ParameterizedRunnableFactory.runnableJPanel(new PrivateToPublicPopup(), "Enter private key in base58 format ...");
-	}
+	private final JTextField textField;
+	private final JTextArea textArea;
+
+	public static final RunnableFactory FACTORY = new RunnableFactory() {
+			@Override public Runnable newRunnable(final Map<String, String> params) {
+				for (final Entry<String, String> e: params.entrySet()) {
+					final Logger log = getLogger(PrivateToPublicPopup.class);
+					log.info("ignoring unrecognized param `-{}'", e.getKey());
+				}
+				return JPanelTools.show(new PrivateToPublicPopup(), "Enter private key ...");
+			}
+		};
 
 	public PrivateToPublicPopup() {
 		super(new GridBagLayout());
@@ -53,7 +67,7 @@ public class PrivateToPublicPopup extends JPanel implements ActionListener {
 
 	@Override public void actionPerformed(final ActionEvent evt) {
 		final String text = textField.getText();
-		textArea.append(Base58Tools.publicFromPrivate(text) + newline);
+		textArea.append(Base58Tools.publicFromPrivate(text) + LF);
 		textField.selectAll();
 
 		//Make sure the new text is visible, even if there

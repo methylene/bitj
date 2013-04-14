@@ -1,15 +1,17 @@
 package ooq.asdf.tools;
 
+import static javax.swing.SwingUtilities.invokeLater;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 
-public class ParameterizedRunnableFactory {
+public final class JPanelTools {
 	
-	public static final ParameterizedRunnable runnableJPanel(final JPanel panel, final String label) {
-		return new ParameterizedRunnable() {
+	public static Runnable show(final JPanel panel, final String label) {
+		return new Runnable() {
 			@Override public void run() {
-				javax.swing.SwingUtilities.invokeLater(new Runnable() {
+				invokeLater(new Runnable() {
 					@Override public void run() {
 						//Create and set up the window.
 						final JFrame frame = new JFrame(label);
@@ -23,7 +25,6 @@ public class ParameterizedRunnableFactory {
 						frame.setVisible(true);
 					}
 				});
-
 			}
 		};
 	};

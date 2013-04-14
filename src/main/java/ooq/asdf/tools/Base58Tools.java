@@ -6,7 +6,7 @@ import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.DumpedPrivateKey;
 import com.google.bitcoin.core.NetworkParameters;
 
-public class Base58Tools {
+public final class Base58Tools {
 	
 	public static String publicFromPrivate(final String privKey) {
 		final NetworkParameters networkParams = NetworkParameters.prodNet();
