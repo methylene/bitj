@@ -8,11 +8,13 @@ import org.slf4j.Logger;
 
 import ooq.asdf.tools.ArgsParser;
 import ooq.asdf.tools.RunnableFactory;
+import ooq.asdf.view.BalancePopup;
 import ooq.asdf.view.PrivateToPublicPopup;
 
 public enum Action {
 
-	CONVERT(PrivateToPublicPopup.FACTORY);
+	CONVERT(PrivateToPublicPopup.FACTORY),
+	BALANCE(BalancePopup.FACTORY);
 
 	private static final RunnableFactory DEFAULT_ACTION = new RunnableFactory() {
 		@Override public Runnable newRunnable(final Map<String, String> params) {
