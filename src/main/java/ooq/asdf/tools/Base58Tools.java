@@ -1,5 +1,8 @@
 package ooq.asdf.tools;
 
+import static ooq.asdf.tools.BlockChain.chain;
+import static ooq.asdf.tools.Params.params;
+import static ooq.asdf.tools.PeerGroup.peerGroup;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.math.BigInteger;
@@ -8,16 +11,14 @@ import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.Base58;
 import com.google.bitcoin.core.DumpedPrivateKey;
 import com.google.bitcoin.core.ECKey;
-import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.Wallet;
 
 public final class Base58Tools {
 
 	public static String publicFromPrivate(final String privKey) {
-		final NetworkParameters networkParams = NetworkParameters.prodNet();
 		try {
-			final DumpedPrivateKey key = new DumpedPrivateKey(networkParams, privKey);
-			return key.getKey().toAddress(networkParams).toString();
+			final DumpedPrivateKey key = new DumpedPrivateKey(params(), privKey);
+			return key.getKey().toAddress(params()).toString();
 		} catch (final AddressFormatException e) {
 			getLogger(Base58Tools.class).error("bad stuff", e);
 			return e.getMessage();
@@ -25,12 +26,11 @@ public final class Base58Tools {
 	}
 
 	public static BigInteger getBalance(final String pubKey) {
-		final NetworkParameters params = NetworkParameters.prodNet();
-		final Wallet wallet = new Wallet(params);
-		byte[] pub;
+		final Wallet wallet = new Wallet(params());
+		chain().addWallet(wallet);
+		peerGroup().addWallet(wallet);
 		try {
-			pub = Base58.decode(pubKey);
-			wallet.keychain.add(new ECKey(null, pub));
+			wallet.keychain.add(new ECKey(null, Base58.decode(pubKey)));
 			return wallet.getBalance();
 		} catch (final AddressFormatException e) {
 			getLogger(Base58Tools.class).error("bad stuff", e);

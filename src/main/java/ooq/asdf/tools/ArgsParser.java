@@ -22,16 +22,16 @@ public final class ArgsParser {
 
 	public static Runnable getAction(final String[] args) {
 		final ArgsParser parser = new ArgsParser();
-		final Map<String, String> params = parser.getParams(args);
-		final Map<String, String> nonActionParams = parser.getNonActionParams(params);
-		final String actionParam = parser.getActionParam(params);
+		final Map<String, String> commandLineParams = parser.getParams(args);
+		final Map<String, String> nonActionParams = parser.getNonActionParams(commandLineParams);
+		final String actionParam = parser.getActionParam(commandLineParams);
 		return Action.factoryFor(actionParam).newRunnable(nonActionParams);
 	}
 
 	private String getActionParam(final Map<String, String> params) {
 		final String actionParam = params.get(ACTION_PARAM);
 		if (actionParam == null) {
-			log.warn("no action param found, use -{}", ACTION_PARAM);
+			log.warn("no action param found, try -{} {}", ACTION_PARAM, Action.values());
 		}
 		return actionParam;
 	}
