@@ -26,6 +26,7 @@ public class BlockStore {
 						final File blockChainFile = blockChainFile();
 						getLogger(BlockStore.class).info("block chain file: {}", blockChainFile);
 						blockStore = new ReplayableBlockStore(params(), blockChainFile, true);
+//						blockStore = new H2FullPrunedBlockStore(params(), "h2:mem:chain", fullStoreDepth());
 						return blockStore;
 					} catch (final BlockStoreException e) {
 						throw new RuntimeException(e);

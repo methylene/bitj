@@ -9,7 +9,7 @@ public class BlockChain {
 
 	private static volatile com.google.bitcoin.core.BlockChain INSTANCE;
 
-	public static com.google.bitcoin.core.BlockChain chain() {
+	public static com.google.bitcoin.core.BlockChain blockChain() {
 		if (INSTANCE != null) {
 			return INSTANCE;
 		} else {

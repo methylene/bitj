@@ -1,6 +1,7 @@
 package ooq.asdf.tools;
 
-import static ooq.asdf.tools.BlockChain.chain;
+import static ooq.asdf.tools.BlockChain.blockChain;
+import static ooq.asdf.tools.DownloadListener.downloadListener;
 import static ooq.asdf.tools.Params.params;
 
 import com.google.bitcoin.discovery.DnsDiscovery;
@@ -17,9 +18,10 @@ public class PeerGroup {
 				if (instance != null) {
 					return instance;
 				} else {
-					instance = new com.google.bitcoin.core.PeerGroup(params(), chain());
+					instance = new com.google.bitcoin.core.PeerGroup(params(), blockChain());
 					instance.addPeerDiscovery(new DnsDiscovery(params()));
 					instance.startAndWait();
+					instance.startBlockChainDownload(downloadListener());
 					return instance;
 				}
 			}

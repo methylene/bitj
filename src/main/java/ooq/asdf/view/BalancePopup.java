@@ -11,6 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import ooq.asdf.tools.Balance;
 import ooq.asdf.tools.Base58Tools;
 import ooq.asdf.tools.JPanelTools;
 
@@ -56,7 +57,8 @@ public final class BalancePopup extends JPanel implements ActionListener {
 
 	@Override public void actionPerformed(final ActionEvent evt) {
 		final String text = textField.getText();
-		textArea.append(Base58Tools.getBalance(text) + LF);
+		Balance.init(text);
+		textArea.append(Balance.balance() + LF);
 		textField.selectAll();
 
 		//Make sure the new text is visible, even if there
