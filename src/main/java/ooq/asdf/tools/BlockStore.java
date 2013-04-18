@@ -1,11 +1,14 @@
 package ooq.asdf.tools;
 
-import static ooq.asdf.tools.FullStoreDepth.fullStoreDepth;
+import static ooq.asdf.tools.BlockChainFile.blockChainFile;
 import static ooq.asdf.tools.Params.params;
+import static org.slf4j.LoggerFactory.getLogger;
 
-import com.google.bitcoin.core.FullPrunedBlockChain;
+import java.io.File;
+
+import org.multibit.store.ReplayableBlockStore;
+
 import com.google.bitcoin.store.BlockStoreException;
-import com.google.bitcoin.store.H2FullPrunedBlockStore;
 
 public class BlockStore {
 
@@ -20,7 +23,9 @@ public class BlockStore {
 					return blockStore;
 				} else {
 					try {
-						blockStore = new H2FullPrunedBlockStore(params(), "jdbc:h2:bs", fullStoreDepth());
+						final File blockChainFile = blockChainFile();
+						getLogger(BlockStore.class).info("block chain file: {}", blockChainFile);
+						blockStore = new ReplayableBlockStore(params(), blockChainFile, true);
 						return blockStore;
 					} catch (final BlockStoreException e) {
 						throw new RuntimeException(e);

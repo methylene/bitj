@@ -1,25 +1,18 @@
 package ooq.asdf.view;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 import java.awt.GridBagConstraints;
-
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import org.slf4j.Logger;
-
 import ooq.asdf.tools.Base58Tools;
 import ooq.asdf.tools.JPanelTools;
-import ooq.asdf.tools.RunnableFactory;
 
 public final class BalancePopup extends JPanel implements ActionListener {
 
@@ -32,12 +25,8 @@ public final class BalancePopup extends JPanel implements ActionListener {
 	private final JTextField textField;
 	private final JTextArea textArea;
 
-	public static final RunnableFactory FACTORY = new RunnableFactory() {
-			@Override public Runnable newRunnable(final Map<String, String> params) {
-				for (final Entry<String, String> e: params.entrySet()) {
-					final Logger log = getLogger(BalancePopup.class);
-					log.info("ignoring unrecognized param `-{}'", e.getKey());
-				}
+	public static final Callable<Runnable> FACTORY = new Callable<Runnable>() {
+			@Override public Runnable call() {
 				return JPanelTools.show(new BalancePopup(), "Enter public key ...");
 			}
 		};

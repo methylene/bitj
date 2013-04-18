@@ -3,48 +3,41 @@ package ooq.asdf.tools;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
+
+import ooq.asdf.Action;
+import ooq.asdf.DefaultAction;
+import ooq.asdf.tools.CommandLine.Key;
 
 import org.slf4j.Logger;
 
-import ooq.asdf.Action;
-
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 public final class ArgsParser {
 
-	public static final String ACTION_PARAM = "a";
-
 	private final Logger log = getLogger(ArgsParser.class);
+	
+	private final String[] args;
 
-	public static Runnable getAction(final String[] args) {
-		final ArgsParser parser = new ArgsParser();
-		final Map<String, String> commandLineParams = parser.getParams(args);
-		final Map<String, String> nonActionParams = parser.getNonActionParams(commandLineParams);
-		final String actionParam = parser.getActionParam(commandLineParams);
-		return Action.factoryFor(actionParam).newRunnable(nonActionParams);
-	}
-
-	private String getActionParam(final Map<String, String> params) {
-		final String actionParam = params.get(ACTION_PARAM);
-		if (actionParam == null) {
-			log.warn("no action param found, try -{} {}", ACTION_PARAM, Action.values());
+	public Runnable getAction() {
+		final String action = CommandLine.commandLine().nonActionParam(CommandLine.Key.ACTION);
+		final Callable<Runnable> factory = Action.factoryFor(action);
+		try {
+			return factory.call();
+		} catch (final Exception e) {
+			getLogger(ArgsParser.class).error("bad stuff", e);
+			return DefaultAction.defaultRunnable();
 		}
-		return actionParam;
 	}
 
-	private Map<String, String> getNonActionParams(final Map<String, String> params) {
-		return Maps.filterKeys(params, Predicates.not(new Predicate<String>() {
-			@Override public boolean apply(final String key) {
-				return ACTION_PARAM.equals(key);
-			}
-		}));
+	public ArgsParser(final String[] args) {
+		super();
+		this.args = args;
+		CommandLine.init(this);
 	}
 
-	private Map<String, String> getParams(final String[] args) {
+	public Map<CommandLine.Key, String> getParams() {
 		if (args == null)
 			return ImmutableMap.of();
 		if (args.length % 2 != 0) {
@@ -53,17 +46,18 @@ public final class ArgsParser {
 			return ImmutableMap.of();
 		}
 		try {
-			final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+			final ImmutableMap.Builder<CommandLine.Key, String> builder = ImmutableMap.builder();
 			for (int i = 0; i < args.length; i += 2) {
-				final String name = args[i].trim();
-				final String value = args[i + 1].trim();
-				if (name.startsWith("-")) {
-					final String nameNoDash = name.substring(1);
-					builder.put(nameNoDash, value);
+				final String $name = args[i].trim();
+				final String $value = args[i + 1].trim();
+				final Key key;
+				if ($name.startsWith("-")) {
+					key = CommandLine.Key.tryParse($name.substring(1));
 				} else {
-					final Logger log = getLogger(ArgsParser.class);
-					log.error("each param name must start with a dash -- ignoring param pair: `{} {}'",
-							name, value);
+					key = CommandLine.Key.tryParse($name);
+				}
+				if (key != null) {
+					builder.put(key, $value);
 				}
 			}
 			return builder.build();

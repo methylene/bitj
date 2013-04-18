@@ -7,19 +7,19 @@ import com.google.bitcoin.store.BlockStoreException;
 
 public class BlockChain {
 
-	private static volatile com.google.bitcoin.core.BlockChain instance;
+	private static volatile com.google.bitcoin.core.BlockChain INSTANCE;
 
 	public static com.google.bitcoin.core.BlockChain chain() {
-		if (instance != null) {
-			return instance;
+		if (INSTANCE != null) {
+			return INSTANCE;
 		} else {
 			synchronized (BlockChain.class) {
-				if (instance != null) {
-					return instance;
+				if (INSTANCE != null) {
+					return INSTANCE;
 				} else {
 					try {
-						instance = new com.google.bitcoin.core.BlockChain(params(), blockStore());
-						return instance;
+						INSTANCE = new com.google.bitcoin.core.BlockChain(params(), blockStore());
+						return INSTANCE;
 					} catch (final BlockStoreException e) {
 						throw new RuntimeException(e);
 					}
