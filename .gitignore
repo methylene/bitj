@@ -1,11 +1,7 @@
-/.settings
-/docs
-/log
 /out
 /target
-/.classpath
 /bin
-.project
-.idea/.name
-.idea
-/bitj
+/.project
+/.classpath
+/.settings
+/.idea
