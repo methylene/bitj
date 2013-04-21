@@ -38,7 +38,7 @@ appender("DETAIL_APPENDER", RollingFileAppender) {
     pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %xEx%n"
   }
 }
-root(INFO, ["CONSOLE_APPENDER", "DETAIL_APPENDER"])
+root(INFO, ["CONSOLE_APPENDER"])
 logger("com.google.bitcoin.core", WARN)
 logger("com.google.bitcoin.crypto", WARN)
 logger("com.google.bitcoin.discovery", WARN)

@@ -35,7 +35,7 @@ public class AppFiles {
 		return INSTANCE;
 	}
 
-	private static final String DEFAULT_BLOCKSTORE = "blocks.h2.db";
+	private static final String DEFAULT_H2 = "blocks";
 	
 	private static final String DEFAULT_APP_HOME = "bitj";
 	private static final String PROPERTIES_FILE = "bitj.properties"; // in 'app home' folder
@@ -104,9 +104,9 @@ public class AppFiles {
 		final String userHome = System.getProperty("user.home");
 		final String $appHome;
 		if (commandLine().argument(Key.RC) != null) {
-			$appHome = DEFAULT_APP_HOME;
-		} else {
 			$appHome = commandLine().argument(Key.RC);
+		} else {
+			$appHome = DEFAULT_APP_HOME;
 		}
 		final File appHome = new File(userHome, $appHome);
 		if (!appHome.exists()) {
@@ -135,7 +135,7 @@ public class AppFiles {
 				if (result.length() == 0l) {
 					pw = new PrintWriter(result);
 					final String k = UserPropertyKey.BLOCKSTORE.name().toLowerCase(Locale.ENGLISH);
-					pw.format(Locale.ENGLISH, "%s = %s", k, DEFAULT_BLOCKSTORE);
+					pw.format(Locale.ENGLISH, "%s = %s", k, DEFAULT_H2);
 					pw.close();
 				}
 				getLogger(getClass()).info("Created user properties: " + result.getCanonicalPath());

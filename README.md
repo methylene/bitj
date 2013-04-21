@@ -4,8 +4,10 @@ The project goal is to create an easy-reading code with not too many lines. The 
 
 Files used:
 
-* ~/bitj/bitj.properties user settings (read-only)
-* ~/bitj/blocks.h2.db
+* ``$BITJ_HOME/bitj.properties`` user settings (read-only)
+* ``$BITJ_HOME/blocks.h2.db``
+* ``$BITJ_HOME/blocks.lock.db``
+* ``$BITJ_HOME/blocks.trace.db``
 
 
 ### Dependencies
