@@ -74,17 +74,17 @@
 			<artifactId>h2</artifactId>
 			<version>1.3.171</version>
 		</dependency>
-		<dependency>
-			<groupId>org.multibit</groupId>
-			<artifactId>multibit</artifactId>
-			<version>0.5.9rc1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.multibit</groupId> -->
+<!-- 			<artifactId>multibit</artifactId> -->
+<!-- 			<version>0.5.9rc1</version> -->
+<!-- 			<exclusions> -->
+<!-- 				<exclusion> -->
+<!-- 					<groupId>ch.qos.logback</groupId> -->
+<!-- 					<artifactId>logback-classic</artifactId> -->
+<!-- 				</exclusion> -->
+<!-- 			</exclusions> -->
+<!-- 		</dependency> -->
 
 	</dependencies>
 

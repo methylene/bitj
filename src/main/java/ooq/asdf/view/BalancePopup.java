@@ -1,17 +1,17 @@
 package ooq.asdf.view;
 
-import static ooq.asdf.tools.BlockChain.blockChain;
-import static ooq.asdf.tools.BlockChainFile.blockChainFile;
-import static ooq.asdf.tools.DownloadListener.downloadListener;
 import static ooq.asdf.tools.Params.networkParams;
+import static ooq.asdf.tools.AppFiles.userProperties;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.awt.HeadlessException;
 import java.io.File;
 import java.util.concurrent.Callable;
 
 import javax.swing.JOptionPane;
 
-import org.multibit.store.ReplayableBlockStore;
+import ooq.asdf.tools.DownloadListener;
+import ooq.asdf.tools.AppFiles.UserPropertyKey;
 
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.Base58;
@@ -20,7 +20,9 @@ import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.PeerGroup;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.discovery.DnsDiscovery;
+import com.google.bitcoin.store.BlockStore;
 import com.google.bitcoin.store.BlockStoreException;
+import com.google.bitcoin.store.H2FullPrunedBlockStore;
 
 public final class BalancePopup {
 
@@ -28,33 +30,46 @@ public final class BalancePopup {
 		@Override public Runnable call() {
 			return new Runnable() {
 				@Override public void run() {
-					doIt();
+					try {
+						showBalance(Base58.decode(JOptionPane.showInputDialog("Enter private key:")));
+					} catch (final HeadlessException e) {
+						getLogger(BalancePopup.class).error("Bad stuff", e);
+					} catch (final AddressFormatException e) {
+						getLogger(BalancePopup.class).error("Bad stuff", e);
+					}
 				}
-
 			};
 		}
 	};
 
-	private static void doIt() {
+	/**
+	 * How to acquire a valid input to this method: Generate a private key at bitaddress.org 
+	 * then convert it to bytes using 
+	 * {@link com.google.bitcoin.core.Base58#decode(String) Base58#decode(String)}. 
+	 * 
+	 * To do: This method should should preferably require public key only.
+	 * 
+	 * @param priv A bitcoin account 'private key'.
+	 * @see <a href="https://www.bitaddress.org/">https://www.bitaddress.org</a>
+	 * @see <a href="https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list">https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list</a>
+	 * @see <a href="http://blockexplorer.com/q/addressbalance">http://blockexplorer.com/q/addressbalance</a>
+	 */
+	private static void showBalance(final byte[] priv) {
 		try {
-			final String $priv = JOptionPane.showInputDialog("Enter private key:");
 			final Wallet wallet = new Wallet(networkParams());
-			final byte[] priv = Base58.decode($priv);
 			wallet.keychain.add(new ECKey(priv, null));
-			final File blockChainFile = blockChainFile();
-			final ReplayableBlockStore blockStore = new ReplayableBlockStore(networkParams(), blockChainFile, false);
+			final String file = userProperties().getUserFileName(UserPropertyKey.BLOCKSTORE);
+			final BlockStore blockStore = new H2FullPrunedBlockStore(networkParams(), file, 1000);
 			final BlockChain blockChain = new BlockChain(networkParams(), blockStore);
-			final PeerGroup peerGroup = new com.google.bitcoin.core.PeerGroup(networkParams(), blockChain());
+			final PeerGroup peerGroup = new PeerGroup(networkParams(), blockChain);
 			peerGroup.addPeerDiscovery(new DnsDiscovery(networkParams()));
 			peerGroup.startAndWait();
-			peerGroup.startBlockChainDownload(downloadListener());
+			peerGroup.startBlockChainDownload(new DownloadListener(wallet)); // hmm ..
 			blockChain.addWallet(wallet);
 			peerGroup.addWallet(wallet);
-			peerGroup.downloadBlockChain();
-		} catch (final AddressFormatException e) {
-			getLogger(BalancePopup.class).error("bad stuff", e);
-		} catch (final BlockStoreException e) {
-			getLogger(BalancePopup.class).error("bad stuff", e);
+			peerGroup.downloadBlockChain(); // .. same?
+		} catch (final Exception e) {
+			getLogger(BalancePopup.class).error("Bad stuff", e);
 		}
 	}
 

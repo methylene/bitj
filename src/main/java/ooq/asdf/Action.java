@@ -6,6 +6,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+
 import ooq.asdf.tools.ArgsParser;
 import ooq.asdf.tools.CommandLine;
 import ooq.asdf.view.BalancePopup;
@@ -16,7 +18,7 @@ import com.google.common.collect.ImmutableList.Builder;
 
 public enum Action {
 
-	_DEFAULT(DefaultAction.defaultAction()),
+	_DEFAULT(defaultAction()),
 	CONVERT(PrivateToPublicPopup.FACTORY),
 	BALANCE(BalancePopup.FACTORY);
 	
@@ -60,10 +62,10 @@ public enum Action {
 	 */
 	public static Callable<Runnable> factoryFor(final String action) {
 		try {
-			return action == null ? DefaultAction.defaultAction() : tryParse(action).factory;
+			return action == null ? defaultAction() : tryParse(action).factory;
 		} catch (final RuntimeException e) {
 			getLogger(Action.class).warn("parse error", e);
-			return DefaultAction.defaultAction();
+			return defaultAction();
 		}
 	}
 	
@@ -74,8 +76,26 @@ public enum Action {
 			return factory.call();
 		} catch (final Exception e) {
 			getLogger(ArgsParser.class).error("bad stuff", e);
-			return DefaultAction.defaultRunnable();
+			return defaultRunnable();
 		}
 	}
+	
+	private static Runnable defaultRunnable() {
+		return new Runnable() {
+			@Override public void run() {
+				final Logger log = getLogger(Action.class);
+				log.info("Nothing to do. Specify action using -{} [action]. Actions available: {}",
+						CommandLine.Key.ACTION.key, Action.values());
+			}
+		};
+	}
+	
+	private static Callable<Runnable> defaultAction() {
+		return new Callable<Runnable>() {
+			@Override public Runnable call() {
+				return defaultRunnable();
+			}
+		};
+	};
 
 }

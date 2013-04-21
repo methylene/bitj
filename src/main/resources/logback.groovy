@@ -39,6 +39,9 @@ appender("DETAIL_APPENDER", RollingFileAppender) {
   }
 }
 root(INFO, ["CONSOLE_APPENDER", "DETAIL_APPENDER"])
-logger("org.multibit", WARN)
-logger("com.google.bitcoin", WARN)
-logger("com.google.bitcoin.core.BitcoinSerializer", WARN)
+logger("com.google.bitcoin.core", WARN)
+logger("com.google.bitcoin.crypto", WARN)
+logger("com.google.bitcoin.discovery", WARN)
+logger("com.google.bitcoin.store", DEBUG)
+logger("com.google.bitcoin.uri", WARN)
+logger("com.google.bitcoin.utils", WARN)

@@ -79,16 +79,6 @@ public class CommandLine {
 		return v;
 	}
 	
-	public String argument(final Key key, final String defaultValue) {
-		final String v = params.get(key);
-		if (v != null) {
-			return v;
-		} else {
-			getLogger(getClass()).info("Command line argument `{}' not found. Returning default value `{}'", key.key, defaultValue);
-			return defaultValue;
-		}
-	}
-
 	private CommandLine(final Map<Key, String> nonActionParams) {
 		super();
 		this.params = nonActionParams;
