@@ -1,7 +1,7 @@
 package ooq.asdf.tools;
 
 import static ooq.asdf.tools.BlockChainFile.blockChainFile;
-import static ooq.asdf.tools.Params.params;
+import static ooq.asdf.tools.Params.networkParams;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.File;
@@ -25,7 +25,7 @@ public class BlockStore {
 					try {
 						final File blockChainFile = blockChainFile();
 						getLogger(BlockStore.class).info("block chain file: {}", blockChainFile);
-						blockStore = new ReplayableBlockStore(params(), blockChainFile, true);
+						blockStore = new ReplayableBlockStore(networkParams(), blockChainFile, true);
 //						blockStore = new H2FullPrunedBlockStore(params(), "h2:mem:chain", fullStoreDepth());
 						return blockStore;
 					} catch (final BlockStoreException e) {

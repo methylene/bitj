@@ -12,7 +12,7 @@ public class BlockChainFile {
 
 	public static File blockChainFile() {
 		final File userHome = userProperties().appHome();
-		final String filename = userProperties().getUserProperty(UserProperties.Key.BLOCKCHAIN_FILE, DEFAULT_FILE);
+		final String filename = userProperties().getUserProperty(UserProperties.UserPropertyKey.BLOCKCHAIN_FILE, DEFAULT_FILE);
 		final File file = new File(userHome, filename);
 		try {
 			if (!file.createNewFile()) {

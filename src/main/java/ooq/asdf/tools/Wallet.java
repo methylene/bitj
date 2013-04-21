@@ -1,7 +1,7 @@
 package ooq.asdf.tools;
 
 import static ooq.asdf.tools.BlockChain.blockChain;
-import static ooq.asdf.tools.Params.params;
+import static ooq.asdf.tools.Params.networkParams;
 import static ooq.asdf.tools.PeerGroup.peerGroup;
 import static ooq.asdf.tools.PublicKey.publicKey;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -17,7 +17,7 @@ public class Wallet {
 	public static com.google.bitcoin.core.Wallet wallet() {
 		try {
 			if (INSTANCE == null) {
-				INSTANCE = new com.google.bitcoin.core.Wallet(params());
+				INSTANCE = new com.google.bitcoin.core.Wallet(networkParams());
 				INSTANCE.keychain.add(new ECKey(null, Base58.decode(publicKey())));
 				blockChain().addWallet(INSTANCE);
 				peerGroup().addWallet(INSTANCE);

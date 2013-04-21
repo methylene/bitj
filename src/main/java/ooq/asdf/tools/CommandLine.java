@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableMap;
 
 public class CommandLine {
 
@@ -38,10 +37,10 @@ public class CommandLine {
 		public static Key tryParse(final String s) {
 			final List<Key> candidates = keysThatStartWith(s);
 			if (candidates.isEmpty()) {
-				getLogger(CommandLine.class).warn("ignoring unknown command line argument: `{}'", s);	
+				getLogger(CommandLine.class).warn("Ignoring unknown command line argument: `{}'", s);	
 				return null;
 			} else if (candidates.size() > 1) {
-				getLogger(CommandLine.class).warn("ignoring ambiguous command line argument: `{}', candidates: [{}]", s, candidates);
+				getLogger(CommandLine.class).warn("Ignoring ambiguous command line argument: `{}'. Candidates: [{}]", s, candidates);
 				return null;
 			} else {
 				return candidates.get(0);
@@ -50,16 +49,16 @@ public class CommandLine {
 
 	}
 
-	private final Map<Key, String> nonActionParams;
+	private final Map<Key, String> params;
 
 	private static volatile CommandLine INSTANCE;
 
-	public static CommandLine init(final ArgsParser parser) {
+	public static CommandLine init(final String[] args) {
 		if (INSTANCE != null) {
-			getLogger(CommandLine.class).warn("calling init twice?");
+			getLogger(CommandLine.class).warn("Calling init multiple times.");
 			return INSTANCE;
 		} else {
-			INSTANCE = new CommandLine(parser.getParams());
+			INSTANCE = new CommandLine(new ArgsParser(args).getParams());
 			return INSTANCE;
 		}
 	}
@@ -68,28 +67,31 @@ public class CommandLine {
 		if (INSTANCE != null) {
 			return INSTANCE;
 		} else {
-			getLogger(CommandLine.class).error("call init first");
-			return new CommandLine(ImmutableMap.<Key, String> of());
+			throw new IllegalStateException("Please call init first.");
 		}
 	}
 	
-	public String nonActionParam(final Key key) {
-		return nonActionParams.get(key);
+	public String argument(final Key key) {
+		final String v = params.get(key);
+		if (v == null) {
+			getLogger(getClass()).info("Command line argument `{}' not found. Returning null", key.key);
+		}
+		return v;
 	}
 	
-	public String nonActionParam(final Key key, final String defaultValue) {
-		final String v = nonActionParams.get(key);
+	public String argument(final Key key, final String defaultValue) {
+		final String v = params.get(key);
 		if (v != null) {
 			return v;
 		} else {
-			getLogger(getClass()).info("command line argument `{}' not found; using default value `{}'", key.key, defaultValue);
+			getLogger(getClass()).info("Command line argument `{}' not found. Returning default value `{}'", key.key, defaultValue);
 			return defaultValue;
 		}
 	}
 
 	private CommandLine(final Map<Key, String> nonActionParams) {
 		super();
-		this.nonActionParams = nonActionParams;
+		this.params = nonActionParams;
 	}
 
 }

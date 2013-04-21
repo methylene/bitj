@@ -1,27 +1,17 @@
 package ooq.asdf.tools;
 
-import static ooq.asdf.tools.BlockStore.blockStore;
 import static ooq.asdf.tools.Wallet.wallet;
 import static org.slf4j.LoggerFactory.getLogger;
-import java.util.List;
 
 import com.google.bitcoin.core.AbstractPeerEventListener;
 import com.google.bitcoin.core.Block;
-import com.google.bitcoin.core.BlockChainListener;
 import com.google.bitcoin.core.Peer;
 import com.google.bitcoin.core.PeerEventListener;
-import com.google.bitcoin.core.ScriptException;
-import com.google.bitcoin.core.Sha256Hash;
-import com.google.bitcoin.core.StoredBlock;
-import com.google.bitcoin.core.Transaction;
-import com.google.bitcoin.core.VerificationException;
-import com.google.bitcoin.core.AbstractBlockChain.NewBlockType;
 import com.google.bitcoin.core.Wallet.BalanceType;
 
 public class DownloadListener {
 	
 	private static volatile PeerEventListener INSTANCE = null;
-	
 	
 	public static PeerEventListener downloadListener() {
 		if (INSTANCE == null) {

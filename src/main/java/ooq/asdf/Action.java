@@ -1,16 +1,15 @@
 package ooq.asdf;
 
+import static ooq.asdf.tools.CommandLine.commandLine;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import ooq.asdf.tools.ArgsParser;
 import ooq.asdf.tools.CommandLine;
-import ooq.asdf.tools.CommandLine.Key;
 import ooq.asdf.view.BalancePopup;
 import ooq.asdf.view.PrivateToPublicPopup;
-
-import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -65,6 +64,17 @@ public enum Action {
 		} catch (final RuntimeException e) {
 			getLogger(Action.class).warn("parse error", e);
 			return DefaultAction.defaultAction();
+		}
+	}
+	
+	public static Runnable getAction(final CommandLine commandLine) {
+		final String action = commandLine().argument(CommandLine.Key.ACTION);
+		final Callable<Runnable> factory = Action.factoryFor(action);
+		try {
+			return factory.call();
+		} catch (final Exception e) {
+			getLogger(ArgsParser.class).error("bad stuff", e);
+			return DefaultAction.defaultRunnable();
 		}
 	}
 

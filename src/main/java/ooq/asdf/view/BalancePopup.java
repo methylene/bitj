@@ -1,69 +1,61 @@
 package ooq.asdf.view;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import static ooq.asdf.tools.BlockChain.blockChain;
+import static ooq.asdf.tools.BlockChainFile.blockChainFile;
+import static ooq.asdf.tools.DownloadListener.downloadListener;
+import static ooq.asdf.tools.Params.networkParams;
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.File;
 import java.util.concurrent.Callable;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.JOptionPane;
 
-import ooq.asdf.tools.Balance;
-import ooq.asdf.tools.Base58Tools;
-import ooq.asdf.tools.JPanelTools;
+import org.multibit.store.ReplayableBlockStore;
 
-public final class BalancePopup extends JPanel implements ActionListener {
+import com.google.bitcoin.core.AddressFormatException;
+import com.google.bitcoin.core.Base58;
+import com.google.bitcoin.core.BlockChain;
+import com.google.bitcoin.core.ECKey;
+import com.google.bitcoin.core.PeerGroup;
+import com.google.bitcoin.core.Wallet;
+import com.google.bitcoin.discovery.DnsDiscovery;
+import com.google.bitcoin.store.BlockStoreException;
 
-	private static final int COLUMNS = 40;
+public final class BalancePopup {
 
-	private static final long serialVersionUID = 1L;
+	public static Callable<Runnable> FACTORY = new Callable<Runnable>() {
+		@Override public Runnable call() {
+			return new Runnable() {
+				@Override public void run() {
+					doIt();
+				}
 
-	private final static String LF = "\n";
-	
-	private final JTextField textField;
-	private final JTextArea textArea;
+			};
+		}
+	};
 
-	public static final Callable<Runnable> FACTORY = new Callable<Runnable>() {
-			@Override public Runnable call() {
-				return JPanelTools.show(new BalancePopup(), "Enter public key ...");
-			}
-		};
-
-	public BalancePopup() {
-		super(new GridBagLayout());
-
-		textField = new JTextField(COLUMNS);
-		textField.addActionListener(this);
-
-		textArea = new JTextArea(5, COLUMNS);
-		textArea.setEditable(false);
-		final JScrollPane scrollPane = new JScrollPane(textArea);
-
-		//Add Components to this panel.
-		final GridBagConstraints c = new GridBagConstraints();
-		c.gridwidth = GridBagConstraints.REMAINDER;
-
-		c.fill = GridBagConstraints.HORIZONTAL;
-		add(textField, c);
-
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1.0;
-		c.weighty = 1.0;
-		add(scrollPane, c);
-	}
-
-	@Override public void actionPerformed(final ActionEvent evt) {
-		final String text = textField.getText();
-		Balance.init(text);
-		textArea.append(Balance.balance() + LF);
-		textField.selectAll();
-
-		//Make sure the new text is visible, even if there
-		//was a selection in the text area.
-		textArea.setCaretPosition(textArea.getDocument().getLength());
+	private static void doIt() {
+		try {
+			final String $priv = JOptionPane.showInputDialog("Enter private key:");
+			final Wallet wallet = new Wallet(networkParams());
+			final byte[] priv = Base58.decode($priv);
+			wallet.keychain.add(new ECKey(priv, null));
+			final File blockChainFile = blockChainFile();
+			final ReplayableBlockStore blockStore = new ReplayableBlockStore(networkParams(), blockChainFile, false);
+			final BlockChain blockChain = new BlockChain(networkParams(), blockStore);
+			final PeerGroup peerGroup = new com.google.bitcoin.core.PeerGroup(networkParams(), blockChain());
+			peerGroup.addPeerDiscovery(new DnsDiscovery(networkParams()));
+			peerGroup.startAndWait();
+			peerGroup.startBlockChainDownload(downloadListener());
+			blockChain.addWallet(wallet);
+			peerGroup.addWallet(wallet);
+			peerGroup.downloadBlockChain();
+		} catch (final AddressFormatException e) {
+			getLogger(BalancePopup.class).error("bad stuff", e);
+		} catch (final BlockStoreException e) {
+			getLogger(BalancePopup.class).error("bad stuff", e);
+		}
 	}
 
 }

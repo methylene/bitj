@@ -1,7 +1,7 @@
 package ooq.asdf.tools;
 
 import static ooq.asdf.tools.BlockStore.blockStore;
-import static ooq.asdf.tools.Params.params;
+import static ooq.asdf.tools.Params.networkParams;
 
 import com.google.bitcoin.store.BlockStoreException;
 
@@ -18,7 +18,7 @@ public class BlockChain {
 					return INSTANCE;
 				} else {
 					try {
-						INSTANCE = new com.google.bitcoin.core.BlockChain(params(), blockStore());
+						INSTANCE = new com.google.bitcoin.core.BlockChain(networkParams(), blockStore());
 						return INSTANCE;
 					} catch (final BlockStoreException e) {
 						throw new RuntimeException(e);

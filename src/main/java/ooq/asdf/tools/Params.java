@@ -4,7 +4,7 @@ import com.google.bitcoin.core.NetworkParameters;
 
 public class Params {
 	
-	public static NetworkParameters params() {
+	public static NetworkParameters networkParams() {
 		return NetworkParameters.prodNet();
 	}
 

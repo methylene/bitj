@@ -8,9 +8,8 @@ Dependencies
 Features
 ========
 
-Extract bitcoin address from private key
-----------------------------------------
+### Extract bitcoin address from private key
 
-``mvn clean compile exec:java -Dexec.mainClass=ooq.asdf.Main -Dexec.args="-a convert"``
+``mvn clean compile exec:java -Dexec.mainClass=ooq.asdf.Main -Dexec.args="a c"``
 
 Test it with a private key from [bitaddress.org](https://www.bitaddress.org/)

@@ -1,5 +1,6 @@
 package ooq.asdf.tools;
 
+import static ooq.asdf.tools.CommandLine.commandLine;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.File;
@@ -12,18 +13,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import ooq.asdf.tools.CommandLine.Key;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
 public class UserProperties {
 
-	public enum Key {
+	public enum UserPropertyKey {
 		
 		BLOCKCHAIN_FILE("chain");
 		
 		public final String key;
 
-		private Key(final String key) {
+		private UserPropertyKey(final String key) {
 			this.key = key;
 		}
 	}
@@ -75,11 +78,11 @@ public class UserProperties {
 		return builder.build();
 	}
 
-	public String getUserProperty(final Key key) {
+	public String getUserProperty(final UserPropertyKey key) {
 		return p.get(key.key);
 	}
 	
-	public String getUserProperty(final Key key, final String defaultValue) {
+	public String getUserProperty(final UserPropertyKey key, final String defaultValue) {
 		final String string = p.get(key.key);
 		if (string != null) {
 			return string;
@@ -91,7 +94,7 @@ public class UserProperties {
 
 	public File appHome() {
 		final String userHome = System.getProperty("user.home");
-		final String $appHome = CommandLine.commandLine().nonActionParam(CommandLine.Key.RC, DEFAULT_APP_HOME);
+		final String $appHome = commandLine().argument(Key.RC, DEFAULT_APP_HOME);
 		final File appHome = new File(userHome, $appHome);
 		if (!appHome.exists()) {
 			try {
@@ -105,7 +108,7 @@ public class UserProperties {
 	}
 	
 	private File file() {
-		final String rc = CommandLine.commandLine().nonActionParam(CommandLine.Key.RC, DEFAULT_PROPS);
+		final String rc = commandLine().argument(Key.RC, DEFAULT_PROPS);
 		final File result;
 		if (rc != null) {
 			result = new File(appHome(), rc);
@@ -119,7 +122,7 @@ public class UserProperties {
 				getLogger(getClass()).info("created user properties: " + result.getCanonicalPath());
 				if (result.length() == 0l) {
 					pw = new PrintWriter(result);
-					pw.format(Locale.ENGLISH, "%s = %s", Key.BLOCKCHAIN_FILE.key, BlockChainFile.blockChainFile().getName());
+					pw.format(Locale.ENGLISH, "%s = %s", UserPropertyKey.BLOCKCHAIN_FILE.key, BlockChainFile.blockChainFile().getName());
 					pw.close();
 				}
 			}

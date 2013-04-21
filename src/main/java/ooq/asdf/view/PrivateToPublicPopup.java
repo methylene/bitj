@@ -1,67 +1,37 @@
 package ooq.asdf.view;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import static ooq.asdf.tools.Params.networkParams;
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.util.concurrent.Callable;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.JOptionPane;
 
-import ooq.asdf.tools.Base58Tools;
-import ooq.asdf.tools.JPanelTools;
+import com.google.bitcoin.core.AddressFormatException;
+import com.google.bitcoin.core.DumpedPrivateKey;
 
-public final class PrivateToPublicPopup extends JPanel implements ActionListener {
+public final class PrivateToPublicPopup {
 
-	private static final int COLUMNS = 40;
-
-	private static final long serialVersionUID = 1L;
-
-	private final static String LF = "\n";
+	public static Callable<Runnable> FACTORY = new Callable<Runnable>() {
+		@Override public Runnable call() {
+			return new Runnable() {
+				@Override public void run() {
+					final String text = JOptionPane.showInputDialog("Enter private key:");
+					System.out.println(publicFromPrivate(text));
+				}
+			};
+		}
+	};
 	
-	private final JTextField textField;
-	private final JTextArea textArea;
-
-	public static final Callable<Runnable> FACTORY = new Callable<Runnable>() {
-			@Override public Runnable call() {
-				return JPanelTools.show(new PrivateToPublicPopup(), "Enter private key ...");
-			}
-		};
-
-	public PrivateToPublicPopup() {
-		super(new GridBagLayout());
-
-		textField = new JTextField(COLUMNS);
-		textField.addActionListener(this);
-
-		textArea = new JTextArea(5, COLUMNS);
-		textArea.setEditable(false);
-		final JScrollPane scrollPane = new JScrollPane(textArea);
-
-		//Add Components to this panel.
-		final GridBagConstraints c = new GridBagConstraints();
-		c.gridwidth = GridBagConstraints.REMAINDER;
-
-		c.fill = GridBagConstraints.HORIZONTAL;
-		add(textField, c);
-
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1.0;
-		c.weighty = 1.0;
-		add(scrollPane, c);
+	public static String publicFromPrivate(final String privKey) {
+		try {
+			final DumpedPrivateKey key = new DumpedPrivateKey(networkParams(), privKey);
+			return key.getKey().toAddress(networkParams()).toString();
+		} catch (final AddressFormatException e) {
+			getLogger(PrivateToPublicPopup.class).error("bad stuff", e);
+			return e.getMessage();
+		}
 	}
 
-	@Override public void actionPerformed(final ActionEvent evt) {
-		final String text = textField.getText();
-		textArea.append(Base58Tools.publicFromPrivate(text) + LF);
-		textField.selectAll();
-
-		//Make sure the new text is visible, even if there
-		//was a selection in the text area.
-		textArea.setCaretPosition(textArea.getDocument().getLength());
-	}
 
 }
