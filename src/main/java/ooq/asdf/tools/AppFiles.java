@@ -1,41 +1,52 @@
 package ooq.asdf.tools;
 
-import static ooq.asdf.tools.CommandLine.commandLine;
-import static org.slf4j.LoggerFactory.getLogger;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-
-import ooq.asdf.tools.CommandLine.Key;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
 public class AppFiles {
 
+    /**
+     * This enum lists all the possible keys in the user properties file
+     *
+     * @see ooq.asdf.tools.AppFiles#_openUserPropertiesFile()
+     */
 	public enum UserPropertyKey {
-		
-		BLOCKSTORE;
-		
-	}
+
+        /**
+         *  blockstore db name
+         */
+		BLOCKSTORE_DB_NAME("blocks");
+
+        private final String defaultValue;
+
+        private UserPropertyKey(String defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+
+    }
 	
 	private static volatile AppFiles INSTANCE = null;
+
+    private final Log log = new Log();
 	
-	public static AppFiles userProperties() {
+	public static AppFiles appFiles() {
 		if (INSTANCE == null) {
 			INSTANCE = new AppFiles();
 		}
 		return INSTANCE;
 	}
 
-	private static final String DEFAULT_H2 = "blocks";
+
 	
 	private static final String DEFAULT_APP_HOME = "bitj";
 	private static final String PROPERTIES_FILE = "bitj.properties"; // in 'app home' folder
@@ -44,21 +55,21 @@ public class AppFiles {
 	
 	private AppFiles() {
 		super();
-		final File f = openUserPropertiesFile();
+		final File f = _openUserPropertiesFile();
 		final Properties props = new Properties();
 		FileInputStream in = null;
 		try {
 			in = new FileInputStream(f);
 			props.load(in);
 		} catch (final FileNotFoundException e) {
-			getLogger(AppFiles.class).error("Bad stuff", e);
+			log.error("Bad stuff", e);
 		} catch (final IOException e) {
-			getLogger(AppFiles.class).error("Bad stuff", e);
+			log.error("Bad stuff", e);
 		} finally {
 			try {
 				in.close();
 			} catch (final IOException e) {
-				getLogger(getClass()).error("Bad stuff", e);
+				log.error("Bad stuff", e);
 			}
 		}
 		properties = convertProps(props);
@@ -68,11 +79,11 @@ public class AppFiles {
 		final Builder<UserPropertyKey, String> builder = ImmutableMap.builder();
 		for (final Entry<Object, Object> e: properties.entrySet()) {
 			try {
-				final String $key = e.getKey().toString().trim().toUpperCase(Locale.ENGLISH);
-				final UserPropertyKey key = UserPropertyKey.valueOf($key);
+				final String $key = e.getKey().toString().trim();
+				final UserPropertyKey key = UserPropertyKey.valueOf($key.toUpperCase());
 				builder.put(key, e.getValue().toString().trim());
 			} catch (final RuntimeException f) {
-				getLogger(getClass()).error("Unrecognized option: {}", e.getKey().toString());
+				log.error("Bad stuff", f);
 			}
 		}
 		return builder.build();
@@ -81,17 +92,17 @@ public class AppFiles {
 	public String getUserProperty(final UserPropertyKey key) {
 		return properties.get(key);
 	}
-	
-	public File getUserFile(final UserPropertyKey key) {
-		return new File(appHome(), properties.get(key));
+
+    /**
+     * @param key
+     * @return a file inside the user directory with a file name (last segment) given by {@code key}
+     */
+	public File getFileNameProperty(final UserPropertyKey key) {
+		return new File(getHome(), getUserProperty(key));
 	}
-	
-	public String getUserFileName(final UserPropertyKey key) throws IOException {
-		return getUserFile(key).getCanonicalPath();
-	}
-	
-	public String getUserProperty(final UserPropertyKey key, final String defaultValue) {
-		final String string = properties.get(key);
+
+	private String getUserProperty(final UserPropertyKey key, final String defaultValue) {
+		final String string = getUserProperty(key);
 		if (string != null) {
 			return string;
 		} else {
@@ -100,11 +111,15 @@ public class AppFiles {
 		
 	}
 
-	public File appHome() {
+    /**
+     * @return The application directory that holds all application data.
+     * This directory is called BITJ_HOME in the docs.
+     */
+	public File getHome() {
 		final String userHome = System.getProperty("user.home");
 		final String $appHome;
-		if (commandLine().argument(Key.RC) != null) {
-			$appHome = commandLine().argument(Key.RC);
+		if (System.getProperty("bitj.home") != null) {
+			$appHome = System.getProperty("bitj.home");
 		} else {
 			$appHome = DEFAULT_APP_HOME;
 		}
@@ -112,35 +127,43 @@ public class AppFiles {
 		if (!appHome.exists()) {
 			try {
 				appHome.mkdirs();
-				getLogger(getClass()).info("Created app home directory: " + appHome.getCanonicalPath());
+				log.info("Created BITJ_HOME = {}", appHome.getCanonicalPath());
 			} catch (final IOException e) {
-				getLogger(getClass()).error("Bad stuff", e);
+                log.error("Could not create BITJ_HOME.", e);
 			}
 		} else {
 			try {
-				getLogger(getClass()).info("Using app home directory: " + appHome.getCanonicalPath());
+				log.info("Using BITJ_HOME = {}", appHome.getCanonicalPath());
 			} catch (final IOException e) {
-				getLogger(getClass()).error("Bad stuff", e);
+                log.error("Bad stuff", e);
 			}
 		}
 		return appHome;
 	}
-	
-	private File openUserPropertiesFile() {
-		final File result = new File(appHome(), PROPERTIES_FILE);
+
+    /**
+     * @return The user's preference, aka rc file.
+     *
+     * Use {@link ooq.asdf.tools.AppFiles#getUserProperty(UserPropertyKey)}
+     * to read the contents of this file.
+     *
+     * The file will be created with default data if not found.
+     */
+	private final File _openUserPropertiesFile() {
+		final File result = new File(getHome(), PROPERTIES_FILE);
 		if (!result.exists()) {
 			PrintWriter pw = null;
 			try {
-				result.createNewFile();
-				if (result.length() == 0l) {
+				if (result.createNewFile()) {
 					pw = new PrintWriter(result);
-					final String k = UserPropertyKey.BLOCKSTORE.name().toLowerCase(Locale.ENGLISH);
-					pw.format(Locale.ENGLISH, "%s = %s", k, DEFAULT_H2);
+                    for (UserPropertyKey key: UserPropertyKey.values()) {
+                        pw.format("%s = %s%n", key.name().toLowerCase(), key.defaultValue);
+                    }
 					pw.close();
 				}
-				getLogger(getClass()).info("Created user properties: " + result.getCanonicalPath());
+				log.info("Created new user properties file: {}", result.getCanonicalPath());
 			} catch (final IOException e) {
-				getLogger(getClass()).error("Bad stuff", e);
+                log.error("Bad stuff", e);
 			} finally {
 				if (pw != null) {
 					pw.close();
@@ -149,5 +172,39 @@ public class AppFiles {
 		}
 		return result;
 	}
-	
+
+    /**
+     * AppFiles is used in logback.groovy, so the logging system is not available here.
+     */
+    private static class Log {
+
+        static enum Level {
+            INFO, ERROR, WARN, DEBUG
+        }
+
+        void log(Level level, String msg, String[] params) {
+            if (params != null && params.length != 0) {
+                String mesg = String.format(msg.replace("{}", "%s"), params);
+                System.out.format("%s [%s] %s%n", AppFiles.class.getCanonicalName(), level, mesg);
+            } else {
+                System.out.format("%s [%s] %s%n", AppFiles.class.getCanonicalName(), level, msg);
+            }
+        }
+
+        void info(String msg) {
+            log(Level.INFO, msg, null);
+        }
+
+        void info(String msg, String... params) {
+            log(Level.INFO, msg, params);
+        }
+
+        void error(String msg, Exception e) {
+            log(Level.ERROR, msg, null);
+            e.printStackTrace();
+        }
+
+    }
+
+
 }

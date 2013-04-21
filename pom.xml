@@ -4,9 +4,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ooq.asdf</groupId>
-	<artifactId>jbit</artifactId>
+	<artifactId>bitj</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>jbit</name>
+	<name>bitj</name>
 	<description>A cli client for Bitcoin</description>
 
 	<properties>
@@ -15,7 +15,7 @@
 	</properties>
 
 	<build>
-		<finalName>jbit</finalName>
+		<finalName>bitj</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -38,17 +38,7 @@
 			<version>4.8.2</version>
 			<type>jar</type>
 			<scope>test</scope>
-		</dependency><!--
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${version.slf4j}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${version.slf4j}</version>
-		</dependency>-->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -74,17 +64,6 @@
 			<artifactId>h2</artifactId>
 			<version>1.3.171</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.multibit</groupId> -->
-<!-- 			<artifactId>multibit</artifactId> -->
-<!-- 			<version>0.5.9rc1</version> -->
-<!-- 			<exclusions> -->
-<!-- 				<exclusion> -->
-<!-- 					<groupId>ch.qos.logback</groupId> -->
-<!-- 					<artifactId>logback-classic</artifactId> -->
-<!-- 				</exclusion> -->
-<!-- 			</exclusions> -->
-<!-- 		</dependency> -->
 
 	</dependencies>
 

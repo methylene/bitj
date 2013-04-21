@@ -12,7 +12,7 @@ public class CommandLine {
 
 	public enum Key {
 
-		ACTION("a"), RC("rc");
+		ACTION("action");
 
 		public final String key;
 
@@ -26,7 +26,7 @@ public class CommandLine {
 			} else {
 				final Builder<Key> builder = ImmutableList.builder();
 				for (final Key k : values()) {
-					if (k.key.startsWith(s)) {
+					if (k.key.toUpperCase().startsWith(s.toUpperCase())) {
 						builder.add(k);
 					}
 				}
@@ -74,7 +74,7 @@ public class CommandLine {
 	public String argument(final Key key) {
 		final String v = params.get(key);
 		if (v == null) {
-			getLogger(getClass()).info("Command line argument `{}' not found. Returning null", key.key);
+			getLogger(getClass()).debug("Command line argument `{}' not found.", key.key);
 		}
 		return v;
 	}

@@ -1,7 +1,7 @@
 package ooq.asdf.view;
 
 import static ooq.asdf.tools.Params.networkParams;
-import static ooq.asdf.tools.AppFiles.userProperties;
+import static ooq.asdf.tools.AppFiles.appFiles;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.awt.HeadlessException;
@@ -21,7 +21,6 @@ import com.google.bitcoin.core.PeerGroup;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.discovery.DnsDiscovery;
 import com.google.bitcoin.store.BlockStore;
-import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.H2FullPrunedBlockStore;
 
 public final class BalancePopup {
@@ -58,8 +57,8 @@ public final class BalancePopup {
 		try {
 			final Wallet wallet = new Wallet(networkParams());
 			wallet.keychain.add(new ECKey(priv, null));
-			final String file = userProperties().getUserFileName(UserPropertyKey.BLOCKSTORE);
-			final BlockStore blockStore = new H2FullPrunedBlockStore(networkParams(), file, 1000);
+			final File file = appFiles().getFileNameProperty(UserPropertyKey.BLOCKSTORE_DB_NAME);
+			final BlockStore blockStore = new H2FullPrunedBlockStore(networkParams(), file.getCanonicalPath(), 1000);
 			final BlockChain blockChain = new BlockChain(networkParams(), blockStore);
 			final PeerGroup peerGroup = new PeerGroup(networkParams(), blockChain);
 			peerGroup.addPeerDiscovery(new DnsDiscovery(networkParams()));
